@@ -60,7 +60,7 @@ def upload():
         # Successfully imported, redirect to week view
         return redirect(url_for("view_week", year=year, kw=kw))
 
-    # GET request → show upload form
+    # GET request -> show upload form
     return render_template("upload.html")
 
 
