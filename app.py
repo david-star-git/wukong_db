@@ -14,7 +14,7 @@ def setup():
     init_db()
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/upload", methods=["GET", "POST"])
 def upload():
     if request.method == "POST":
         file = request.files.get("file")
@@ -101,7 +101,7 @@ def view_week(year, kw):
 
     # Get week id
     week = conn.execute(
-        "SELECT id FROM weeks WHERE year=? AND kalenderwoche=?", (year, kw)
+        "SELECT id FROM weeks WHERE year=? AND week_number=?", (year, kw)
     ).fetchone()
     if not week:
         return f"No hay datos para KW {kw}, {year}", 404

@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='table.css') }}">
+{% endblock %}
+
 {% block content %}
 <h1>Año {{ year }} – KW {{ kw }}</h1>
 
@@ -6,7 +11,7 @@
     <table class="week-table">
         <thead>
             <tr>
-                <th>Trabajador</th>
+                <th class="sticky-col">Trabajador</th>
                 {% for day in range(6) %}
                     <th>{{ day_names[day] }} AM</th>
                     <th>{{ day_names[day] }} PM</th>
@@ -20,15 +25,19 @@
         <tbody>
             {% for worker in workers %}
                 <tr>
-                    <td style="text-align: left;">{{ worker.name }}</td>
+                    <td class="sticky-col worker-name">{{ worker.name }}</td>
                     {% for day in range(6) %}
-                        <td>{{ worker.attendance.get(day, {}).get(1, '') }}</td>
-                        <td>{{ worker.attendance.get(day, {}).get(2, '') }}</td>
+                        <td class="attendance-code">
+                            {{ worker.attendance.get(day, {}).get(1, '') }}
+                        </td>
+                        <td class="attendance-code">
+                            {{ worker.attendance.get(day, {}).get(2, '') }}
+                        </td>
                     {% endfor %}
                     <td>{{ worker.salario or '' }}</td>
                     <td>{{ worker.bonus or '' }}</td>
                     <td>{{ worker.total or '' }}</td>
-                    <td style="text-align: left;">{{ worker.comment or '' }}</td>
+                    <td class="worker-comment">{{ worker.comment or '' }}</td>
                 </tr>
             {% endfor %}
         </tbody>

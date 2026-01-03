@@ -1,12 +1,36 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>KW Manager</title>
+        <title>Wukong DB</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='header.css') }}">
+
+        {% block styles %}{% endblock %}
     </head>
     <body>
+
+        <header class="app-header">
+            <div class="header-left">
+                <span class="app-name">Wukong DB</span>
+            </div>
+
+            <nav class="header-nav">
+                <a href="/" class="nav-item">Dashboard</a>
+                <a href="/upload" class="nav-item">Upload</a>
+                <a href="/week/2026/1" class="nav-item">Weeks</a>
+                <a href="#" class="nav-item disabled">Settings</a>
+            </nav>
+        </header>
+
         <main>
             {% block content %}{% endblock %}
         </main>
+
+        {% block scripts %}{% endblock %}
     </body>
 </html>

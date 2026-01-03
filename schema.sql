@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS workers (
 CREATE TABLE IF NOT EXISTS weeks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     year INTEGER NOT NULL,
-    kalenderwoche INTEGER NOT NULL,
-    UNIQUE(year, kalenderwoche)
+    week_number INTEGER NOT NULL,
+    UNIQUE(year, week_number)
 );
 
 CREATE TABLE IF NOT EXISTS attendance (

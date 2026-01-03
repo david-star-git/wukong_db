@@ -1,0 +1,63 @@
+.app-header 
+{
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: var(--crust);
+    border-bottom: 1px solid var(--mantle);
+}
+
+.header-left 
+{
+    display: flex;
+    align-items: center;
+}
+
+.app-name 
+{
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.header-nav 
+{
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-item 
+{
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.nav-item:hover 
+{
+    background: var(--mantle);
+    color: var(--accent);
+}
+
+.nav-item.disabled 
+{
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.app-content 
+{
+    padding-top: 1rem;
+}
+

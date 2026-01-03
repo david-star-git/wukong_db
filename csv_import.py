@@ -7,7 +7,6 @@ DAYS = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
 
 
 def normalize_name(name: str) -> str:
-    # Remove leading numbers + dot
     name = re.sub(r"^\d+\.\s*", "", name)
     return name.strip().upper()
 
@@ -20,16 +19,27 @@ def parse_money(value: str | None) -> int | None:
 
 
 def import_csv(file, db_path="instance/app.db"):
-    """
-    Imports a CSV file into the database.
-    If overwrite=False and the week exists, returns (kw, year, exists=True)
-    instead of overwriting.
-    """
     raw = file.read()
     text = raw.decode("utf-8", errors="replace")
     rows = list(csv.reader(text.splitlines()))
+    header_row = rows[1]
+    day_columns = {}
+    col_idx = 1
 
-    kw = int(rows[0][1])
+    for day_idx, day in enumerate(DAYS):
+        day_columns[day_idx] = [col_idx, col_idx + 1]  # AM, PM
+        col_idx += 2
+
+    salario_col = col_idx
+    bonus_col = col_idx + 1
+    total_col = col_idx + 3
+    comment_col = col_idx + 5
+
+    # --- extract week number ---
+    try:
+        kw = int(rows[0][1])
+    except (IndexError, ValueError):
+        raise ValueError("Could not parse week number from first row")
     year = datetime.date.today().year
 
     conn = sqlite3.connect(db_path)
@@ -37,29 +47,41 @@ def import_csv(file, db_path="instance/app.db"):
     cur = conn.cursor()
 
     # --- check existing week ---
-    cur.execute("SELECT id FROM weeks WHERE year=? AND kalenderwoche=?", (year, kw))
+    cur.execute("SELECT id FROM weeks WHERE year=? AND week_number=?", (year, kw))
     existing = cur.fetchone()
     existed_before = bool(existing)
 
     if existing:
         week_id = existing["id"]
-        exists = True
         # Delete old data if overwriting
         conn.execute("DELETE FROM attendance WHERE week_id=?", (week_id,))
         conn.execute("DELETE FROM payroll_reference WHERE week_id=?", (week_id,))
     else:
-        conn.execute(
-            "INSERT INTO weeks (year, kalenderwoche) VALUES (?, ?)", (year, kw)
-        )
-        week_id = conn.lastrowid
-        exists = False
+        conn.execute("INSERT INTO weeks (year, week_number) VALUES (?, ?)", (year, kw))
+        week_id = cur.lastrowid
 
-    # --- parse workers in CSV order ---
+    # --- detect headers ---
+    header = [h.strip().lower() for h in rows[1]]
+    day_indices = {day: [] for day in DAYS}
+    for i, h in enumerate(header):
+        for day in DAYS:
+            if h.startswith(day):
+                day_indices[day].append(i)
+
+    # Payroll columns
+    try:
+        salario_col = header.index("salario")
+        bonus_col = header.index("bonus")
+        total_col = header.index("total")
+    except ValueError:
+        salario_col = bonus_col = total_col = None
+
+    # --- parse worker rows ---
     for sort_order, row in enumerate(rows[2:]):
-        if not row or not row[0].strip():
+        if not row or not any(c.strip() for c in row):
             continue
 
-        display_name = re.sub(r"^\d+\.\s*", "", row[0]).strip()
+        display_name = row[0].strip()
         if not any(c.isalpha() for c in display_name):
             continue
 
@@ -73,13 +95,12 @@ def import_csv(file, db_path="instance/app.db"):
         cur.execute("SELECT id FROM workers WHERE normalized_name=?", (normalized,))
         worker_id = cur.fetchone()["id"]
 
-        # Insert attendance
-        for day_idx in range(6):
-            base_col = 1 + day_idx * 2
-            for half in (1, 2):
-                if len(row) <= base_col + (half - 1):
+        # --- attendance ---
+        for day_idx, cols in day_columns.items():
+            for half, col_idx in enumerate(cols, start=1):  # 1=AM, 2=PM
+                if col_idx >= len(row):
                     continue
-                code = row[base_col + (half - 1)].strip()
+                code = row[col_idx].strip()
                 if not code or code == "0":
                     continue
                 cur.execute(
@@ -91,11 +112,24 @@ def import_csv(file, db_path="instance/app.db"):
                     (worker_id, week_id, day_idx, half, code, sort_order),
                 )
 
-        # Insert payroll reference
-        salario = parse_money(row[14] if len(row) > 14 else None)
-        bonus = parse_money(row[15] if len(row) > 15 else None)
-        total = parse_money(row[17] if len(row) > 17 else None)
-        comment = row[18].strip() if len(row) > 18 else None
+        # --- payroll ---
+        salario = parse_money(
+            row[salario_col]
+            if salario_col is not None and salario_col < len(row)
+            else None
+        )
+        bonus = parse_money(
+            row[bonus_col] if bonus_col is not None and bonus_col < len(row) else None
+        )
+        total = parse_money(
+            row[total_col] if total_col is not None and total_col < len(row) else None
+        )
+
+        comment = (
+            row[comment_col].strip()
+            if comment_col < len(row) and row[comment_col].strip()
+            else None
+        )
 
         cur.execute(
             """

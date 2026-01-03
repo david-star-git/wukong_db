@@ -1,0 +1,39 @@
+.confirmation-container 
+{
+    background: var(--mantle);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    max-width: 500px;
+    margin: 3rem auto;
+    text-align: center;
+    color: var(--text);
+}
+
+.confirmation-container h1 
+{
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.confirmation-container p 
+{
+    margin: 1rem 0;
+}
+
+.confirmation-container button 
+{
+    margin: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    background: var(--accent);
+    color: var(--base);
+    border: none;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.confirmation-container button:hover 
+{
+    opacity: 0.9;
+}
+

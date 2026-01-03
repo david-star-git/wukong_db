@@ -1,0 +1,80 @@
+.upload-form
+{
+    max-width: 500px;
+    margin: 3rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.dropzone
+{
+    display: block;
+    border: 2px dashed var(--accent);
+    border-radius: 0.75rem;
+    padding: 2.5rem 1.5rem;
+    background: var(--mantle);
+    cursor: pointer;
+    text-align: center;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.dropzone:hover
+{
+    background: var(--crust);
+}
+
+.dropzone.dragover
+{
+    background: var(--base);
+    border-color: var(--highlight);
+}
+
+.dropzone-content
+{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dropzone-title
+{
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.dropzone-subtitle
+{
+    font-size: 0.9rem;
+    opacity: 0.75;
+}
+
+.dropzone-filename
+{
+    margin-top: 0.75rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--highlight);
+    word-break: break-all;
+}
+
+.upload-btn
+{
+    align-self: flex-end;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    background: var(--accent);
+    color: var(--base);
+    border: none;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.upload-btn:hover
+{
+    opacity: 0.9;
+}

@@ -1,0 +1,70 @@
+.table-container 
+{
+    overflow-x: auto;
+    max-height: 80vh;
+}
+
+.week-table 
+{
+    border-collapse: collapse;
+    width: 100%;
+    background: var(--mantle);
+}
+
+.week-table th,
+.week-table td 
+{
+    border: 1px solid var(--crust);
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.week-table thead th 
+{
+    position: sticky;
+    top: 0;
+    background: var(--crust);
+    color: var(--accent);
+}
+
+.week-table tbody tr:nth-child(even) 
+{
+    background: #1a1b26;
+}
+
+.week-table tbody tr:hover 
+{
+    background: #313244;
+}
+
+td 
+{
+    color: var(--text);
+}
+
+.attendance-code 
+{
+    font-family: "IBM Plex Mono", monospace;
+}
+
+.worker-name .worker-comment 
+{
+    text-align: left;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.sticky-col 
+{
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--mantle);
+}
+
+thead .sticky-col 
+{
+    z-index: 4;
+    background: var(--crust);
+}
+
