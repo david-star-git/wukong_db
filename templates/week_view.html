@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Año {{ year }} – KW {{ kw }}</h1>
+
+<div class="table-container">
+    <table class="week-table">
+        <thead>
+            <tr>
+                <th>Trabajador</th>
+                {% for day in range(6) %}
+                    <th>{{ day_names[day] }} AM</th>
+                    <th>{{ day_names[day] }} PM</th>
+                {% endfor %}
+                <th>Salario</th>
+                <th>Bono</th>
+                <th>Total</th>
+                <th>Comentario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for worker in workers %}
+                <tr>
+                    <td style="text-align: left;">{{ worker.name }}</td>
+                    {% for day in range(6) %}
+                        <td>{{ worker.attendance.get(day, {}).get(1, '') }}</td>
+                        <td>{{ worker.attendance.get(day, {}).get(2, '') }}</td>
+                    {% endfor %}
+                    <td>{{ worker.salario or '' }}</td>
+                    <td>{{ worker.bonus or '' }}</td>
+                    <td>{{ worker.total or '' }}</td>
+                    <td style="text-align: left;">{{ worker.comment or '' }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Map Day Codes</h1>
+    <form method="post" action="/map-codes">
+        {% for code in codes %}
+            <label>{{ code }}</label>
+            <input name="{{ code }}" required>
+        {% endfor %}
+        <button type="submit">Save</button>
+    </form>
+{% endblock %}

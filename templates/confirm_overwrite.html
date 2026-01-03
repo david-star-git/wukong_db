@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="confirmation-container">
+        <h1>Existing Week</h1>
+        <p>Week {{ kw }} of year {{ year }} already exists in the database.</p>
+        <p>Do you want to overwrite the existing data?</p>
+        <form action="{{ url_for("overwrite_week") }}"
+              method="post"
+              enctype="multipart/form-data">
+            <!-- Hidden fields to pass info -->
+            <input type="hidden" name="kw" value="{{ kw }}">
+            <input type="hidden" name="year" value="{{ year }}">
+            <input type="hidden" name="file_name" value="{{ file_name }}">
+            <button type="submit" name="overwrite" value="yes">Yes, overwrite</button>
+            <button type="submit" name="overwrite" value="no">No, cancel</button>
+        </form>
+    </div>
+{% endblock %}
