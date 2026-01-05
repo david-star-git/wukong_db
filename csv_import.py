@@ -21,7 +21,7 @@ def parse_money(value: str | None) -> int | None:
 def import_csv(file, db_path="instance/app.db"):
     raw = file.read()
     text = raw.decode("utf-8", errors="replace")
-    rows = list(csv.reader(text.splitlines()))
+    rows = list(csv.reader(text.splitlines(), delimiter=";"))
     header_row = rows[1]
     day_columns = {}
     col_idx = 1
@@ -57,7 +57,7 @@ def import_csv(file, db_path="instance/app.db"):
         conn.execute("DELETE FROM attendance WHERE week_id=?", (week_id,))
         conn.execute("DELETE FROM payroll_reference WHERE week_id=?", (week_id,))
     else:
-        conn.execute("INSERT INTO weeks (year, week_number) VALUES (?, ?)", (year, kw))
+        cur.execute("INSERT INTO weeks (year, week_number) VALUES (?, ?)", (year, kw))
         week_id = cur.lastrowid
 
     # --- detect headers ---
@@ -81,7 +81,7 @@ def import_csv(file, db_path="instance/app.db"):
         if not row or not any(c.strip() for c in row):
             continue
 
-        display_name = row[0].strip()
+        display_name = re.sub(r'^\s*\d+[\.\-\s]*', '', row[0].strip())
         if not any(c.isalpha() for c in display_name):
             continue
 
@@ -100,16 +100,33 @@ def import_csv(file, db_path="instance/app.db"):
             for half, col_idx in enumerate(cols, start=1):  # 1=AM, 2=PM
                 if col_idx >= len(row):
                     continue
-                code = row[col_idx].strip()
-                if not code or code == "0":
+                site_code = row[col_idx].strip()
+                if not site_code or site_code == "0":
                     continue
+
+                # --- get or create construction site ---
+                cur.execute(
+                    "SELECT id FROM construction_sites WHERE code=?", (site_code,)
+                )
+                site = cur.fetchone()
+                if site is not None:
+                    site_id = site["id"]
+                else:
+                    cur.execute(
+                        "INSERT INTO construction_sites (code, name, active) VALUES (?, ?, 1)",
+                        (site_code, None),
+                    )
+                    site_id = cur.lastrowid
+
+                # --- insert attendance using site_id ---
                 cur.execute(
                     """
-                    INSERT OR REPLACE INTO attendance
+                    INSERT INTO attendance
                     (worker_id, week_id, day, half, code, sort_order)
                     VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(worker_id, week_id, day, half) DO UPDATE SET code=excluded.code
                     """,
-                    (worker_id, week_id, day_idx, half, code, sort_order),
+                    (worker_id, week_id, day_idx, half, site_id, sort_order),
                 )
 
         # --- payroll ---

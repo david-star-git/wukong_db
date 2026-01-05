@@ -1,0 +1,125 @@
+.page-title 
+{
+    padding: 3rem 3rem 0rem;
+}
+
+/* Container spacing */
+.weekview 
+{
+    padding: 0rem 3rem;
+}
+
+/* YEAR BAR CONTAINER */
+.year-container 
+{
+    margin-top: 0.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+    background: var(--crust);
+}
+
+/* YEAR BAR */
+.year-bar 
+{
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+}
+
+.year-btn 
+{
+    min-width: 88px;
+    padding: 0.45rem 0.9rem;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+    background: var(--mantle);
+    color: var(--text);
+}
+
+.year-btn:hover:not(.disabled) 
+{
+    background: var(--accent);
+    color: var(--base);
+}
+
+.year-btn.active 
+{
+    background: var(--accent);
+    color: var(--crust);
+}
+
+.year-btn.disabled 
+{
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* KW GRID */
+.kw-grid 
+{
+    margin-top: 2.5rem;
+    padding: 0 1.25rem; /* left + right padding */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 0.9rem;
+}
+
+.kw-btn 
+{
+    padding: 0.8rem 0;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    background: var(--mantle);
+    color: var(--text);
+}
+
+.kw-btn:hover:not(.disabled) 
+{
+    background: var(--accent);
+    color: var(--base);
+}
+
+.kw-btn.disabled 
+{
+    background: var(--crust);
+    color: color-mix(in srgb, var(--text) 45%, transparent);
+    cursor: not-allowed;
+}
+
+/* Hide native scrollbar */
+.year-bar 
+{
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+.year-bar::-webkit-scrollbar 
+{
+    display: none; /* Chrome / Safari */
+}
+
+/* Fade indicators */
+.year-container 
+{
+    position: relative;
+}
+
+.year-container::before 
+{
+    left: 0;
+    background: linear-gradient(to right, var(--crust), transparent);
+}
+
+.year-container::after 
+{
+    right: 0;
+    background: linear-gradient(to left, var(--crust), transparent);
+}
+

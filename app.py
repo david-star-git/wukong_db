@@ -1,11 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from db import get_db, init_db
 import datetime
 import csv
 import os
 from csv_import import import_csv
+from helpers import *
+import sqlite3
+from io import BytesIO
+from dotenv import load_dotenv
 
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
+ 
 app = Flask(__name__)
+load_dotenv()
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 app.config["UPLOAD_FOLDER"] = "uploads"
 
 
@@ -21,58 +30,52 @@ def upload():
         if not file or not file.filename:
             return render_template("upload.html", error="No file uploaded.")
 
-        # --- Read CSV for preliminary validation ---
-        raw = file.read()
-        text = raw.decode("utf-8", errors="replace")
-        rows = list(csv.reader(text.splitlines()))
-
-        if not rows or len(rows[0]) < 2:
-            return render_template(
-                "upload.html", error="CSV file is empty or malformed."
-            )
-
-        # Extract KW and year from CSV
         try:
+            raw = file.read()
+            text = raw.decode("utf-8", errors="replace")
+            rows = list(csv.reader(text.splitlines(), delimiter=";"))
+
+            if not rows or len(rows[0]) < 2:
+                return render_template(
+                    "upload.html", error="CSV file is empty or malformed."
+                )
+
             kw = int(rows[0][1])
-        except ValueError:
-            return render_template("upload.html", error="Invalid KW value in CSV.")
-        year = datetime.date.today().year
+            year = datetime.date.today().year
 
-        # --- Save uploaded file ---
+        except Exception as e:
+            return render_template("upload.html", error=f"CSV read error: {e}")
+
+        # Save a per-year backup
+        backup_dir = os.path.join(app.config["UPLOAD_FOLDER"], str(year))
+        os.makedirs(backup_dir, exist_ok=True)
+        backup_path = os.path.join(backup_dir, f"{kw}.csv")
+        with open(backup_path, "wb") as f:
+            f.write(raw)
+
+        # Optional: save for archive/debug
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-        file_path = f"{app.config['UPLOAD_FOLDER']}/week_{year}_{kw}.csv"
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], f"week_{year}_{kw}.csv")
+        with open(file_path, "wb") as f:
+            f.write(raw)
 
-        # Reset file pointer and save
-        file.stream.seek(0)
-        file.save(file_path)
+        # Import directly from memory
+        try:
+            kw, year, exists = import_csv(BytesIO(raw), db_path="instance/app.db")
+        except Exception as e:
+            return render_template("upload.html", error=f"Import failed: {e}")
 
-        # --- Import CSV into database ---
-        with open(file_path, "rb") as f:
-            kw, year, exists = import_csv(f, db_path="instance/app.db")
-
-        # --- Handle existing week in web ---
         if exists:
-            # Redirect to a confirmation page in the web UI
             return render_template(
-                "confirm_overwrite.html", kw=kw, year=year, file_name=file_path
+                "confirm_overwrite.html",
+                kw=kw,
+                year=year,
+                file_name=file_path,
             )
 
-        # Successfully imported, redirect to week view
         return redirect(url_for("view_week", year=year, kw=kw))
 
-    # GET request -> show upload form
     return render_template("upload.html")
-
-
-@app.route("/map-codes", methods=["POST"])
-def map_codes():
-    conn = get_db()
-    for code, label in request.form.items():
-        conn.execute(
-            "INSERT OR IGNORE INTO day_codes (code, label) VALUES (?, ?)", (code, label)
-        )
-    conn.commit()
-    return redirect(url_for("upload"))
 
 
 @app.route("/overwrite-week", methods=["POST"])
@@ -93,10 +96,26 @@ def overwrite_week():
     return redirect(url_for("view_week", year=year, kw=kw))
 
 
+@app.route("/weeks/<int:year>")
+def week_overview(year):
+    db = get_db()
+
+    all_years = list(range(2026, 2061))
+    existing_years = get_existing_years(db)
+    existing_kws = get_existing_kws_for_year(db, year)
+
+    return render_template(
+        "week_overview.html",
+        all_years=all_years,
+        existing_years=existing_years,
+        selected_year=year,
+        existing_kws=existing_kws,
+    )
+
+
 @app.route("/week/<int:year>/<int:kw>")
 def view_week(year, kw):
     conn = get_db()
-    # Spanish display names only
     day_names = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
 
     # Get week id
@@ -108,18 +127,33 @@ def view_week(year, kw):
     week_id = week["id"]
 
     # Fetch workers in CSV order
-    workers_db = conn.execute("SELECT id, display_name FROM workers").fetchall()
-
-    # Fetch attendance and payroll
-    attendance_db = conn.execute(
-        "SELECT worker_id, day, half, code FROM attendance WHERE week_id=?", (week_id,)
+    workers_db = conn.execute(
+        "SELECT id, display_name FROM workers ORDER BY id"
     ).fetchall()
-    payroll_db = conn.execute(
-        "SELECT worker_id, salario, bonus, total, comment FROM payroll_reference WHERE week_id=?",
+
+    # Fetch attendance with construction site info
+    attendance_db = conn.execute(
+        """
+        SELECT a.worker_id, a.day, a.half, a.code AS site_id,
+               cs.code AS site_code, cs.name AS site_name
+        FROM attendance a
+        LEFT JOIN construction_sites cs ON a.code = cs.id
+        WHERE a.week_id=?
+        """,
         (week_id,),
     ).fetchall()
 
-    # Build data in CSV order
+    # Fetch payroll
+    payroll_db = conn.execute(
+        """
+        SELECT worker_id, salario, bonus, total, comment
+        FROM payroll_reference
+        WHERE week_id=?
+        """,
+        (week_id,),
+    ).fetchall()
+
+    # Build data
     data = {}
     for w in workers_db:
         data[w["id"]] = {
@@ -131,23 +165,120 @@ def view_week(year, kw):
             "comment": None,
         }
 
+    # Build attendance
     for a in attendance_db:
-        data[a["worker_id"]].setdefault("attendance", {})
-        data[a["worker_id"]]["attendance"].setdefault(a["day"], {})
-        data[a["worker_id"]]["attendance"][a["day"]][a["half"]] = a["code"]
+        wid = a["worker_id"]
+        day = a["day"]
+        half = a["half"]
 
+        worker_att = data[wid]["attendance"]
+        worker_att.setdefault(day, {})
+
+        # Display site name if exists, otherwise fallback to site_code (upper), else code number
+        if a["site_name"]:
+            display = a["site_name"]
+        elif a["site_code"]:
+            display = a["site_code"].upper()
+        else:
+            display = str(a["site_id"]) if a["site_id"] else ""
+
+        worker_att[day][half] = display
+
+    # Build payroll
     for p in payroll_db:
-        data[p["worker_id"]]["salario"] = p["salario"]
-        data[p["worker_id"]]["bonus"] = p["bonus"]
-        data[p["worker_id"]]["total"] = p["total"]
-        data[p["worker_id"]]["comment"] = p["comment"]
+        wid = p["worker_id"]
+        if wid not in data:  # safety check
+            continue
+
+        # Ensure numbers are displayed as strings
+        data[wid]["salario"] = str(p["salario"]) if p["salario"] is not None else ""
+        data[wid]["bonus"] = str(p["bonus"]) if p["bonus"] is not None else ""
+        data[wid]["total"] = str(p["total"]) if p["total"] is not None else ""
+        data[wid]["comment"] = p["comment"] or ""
 
     return render_template(
         "week_view.html",
         year=year,
         kw=kw,
         workers=data.values(),
-        day_names=day_names,  # just for display
+        day_names=day_names,
+    )
+
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    conn = get_db()
+
+    if request.method == "POST":
+        errors = []
+        with conn:  # transaction (prevents locking issues)
+            # ---- Workers: cedulas ----
+            for key, value in request.form.items():
+                if key.startswith("cedula_"):
+                    worker_id = int(key.split("_", 1)[1])
+                    cedula = value.strip() or None
+
+                    try:
+                        conn.execute(
+                            """
+                            UPDATE workers
+                            SET cedula = ?
+                            WHERE id = ? AND active = 1
+                            """,
+                            (cedula, worker_id),
+                        )
+                    except sqlite3.IntegrityError:
+                        errors.append(f"Duplicate cedula for worker {worker_id}")
+
+            # ---- Construction sites: names ----
+            for key, value in request.form.items():
+                if key.startswith("site_name_"):
+                    site_id = int(key.split("_", 2)[2])
+                    name = value.strip()
+
+                    try:
+                        conn.execute(
+                            """
+                            UPDATE construction_sites
+                            SET name = ?
+                            WHERE id = ? AND active = 1
+                            """,
+                            (name, site_id),
+                        )
+                    except sqlite3.IntegrityError:
+                        errors.append(f"Duplicate site name for site {site_id}")
+
+            # Flash errors if any
+        for err in errors:
+            flash(err, "error")
+
+        conn.close()
+
+        return redirect(url_for("settings"))
+
+    # ---- GET ----
+    workers = conn.execute(
+        """
+        SELECT id, normalized_name, cedula
+        FROM workers
+        WHERE active = 1
+        ORDER BY normalized_name
+        """
+    ).fetchall()
+
+    sites = conn.execute(
+        """
+        SELECT id, UPPER(code) as code, name
+        FROM construction_sites
+        WHERE active = 1
+        ORDER BY code
+        """
+    ).fetchall()
+
+    return render_template(
+        "settings.html",
+        workers=workers,
+        sites=sites,
     )
 
 

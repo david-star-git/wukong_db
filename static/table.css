@@ -29,12 +29,12 @@
 
 .week-table tbody tr:nth-child(even) 
 {
-    background: #1a1b26;
+    background: color-mix(in srgb, var(--mantle) 55%, var(--crust) 45%);
 }
 
 .week-table tbody tr:hover 
 {
-    background: #313244;
+    background: color-mix(in srgb, var(--mantle) 85%, var(--accent) 15%);
 }
 
 td 
@@ -50,7 +50,6 @@ td
 .worker-name .worker-comment 
 {
     text-align: left;
-    font-weight: 500;
     white-space: nowrap;
 }
 
@@ -59,7 +58,6 @@ td
     position: sticky;
     left: 0;
     z-index: 3;
-    background: var(--mantle);
 }
 
 thead .sticky-col 

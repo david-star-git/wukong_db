@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='week_overview.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Week Overview</h1>
+
+    <div class="weekview">
+
+        <div class="year-container">
+            <div class="year-bar">
+                {% for y in all_years %}
+                    {% if y in existing_years %}
+                        <a href="{{ url_for('week_overview', year=y) }}"
+                           class="year-btn {% if y == selected_year %}active{% endif %}">
+                            {{ y }}
+                        </a>
+                    {% else %}
+                        <span class="year-btn disabled">{{ y }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="kw-grid">
+            {% for kw in range(1, 53) %}
+                {% if kw in existing_kws %}
+                    <a href="{{ url_for('view_week', year=selected_year, kw=kw) }}"
+                       class="kw-btn">
+                        {{ kw }}
+                    </a>
+                {% else %}
+                    <span class="kw-btn disabled">{{ kw }}</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+    </div>
+{% endblock %}
+

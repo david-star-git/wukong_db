@@ -1,0 +1,97 @@
+.settings-page 
+{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 2.5rem;
+}
+
+.settings-tabs 
+{
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.tab 
+{
+    background: var(--mantle);
+    color: var(--text);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.tab.active 
+{
+    background: var(--accent);
+    color: var(--base);
+}
+
+.tab.disabled 
+{
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Workers grid */
+.workers-grid 
+{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+/* Worker card */
+.worker-card 
+{
+    background: var(--crust);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.worker-name 
+{
+    color: var(--text);
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    user-select: none;
+}
+
+/* Input */
+.worker-card input 
+{
+    background: var(--mantle);
+    border: 1px solid var(--crust);
+    color: var(--text);
+    padding: 0.5rem 0.6rem;
+    border-radius: 8px;
+}
+
+.worker-card input:focus 
+{
+    outline: none;
+    border-color: var(--accent);
+}
+
+/* Actions */
+.settings-actions 
+{
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.tab-panel 
+{
+    display: none;
+}
+
+.tab-panel.active 
+{
+    display: block;
+}
+

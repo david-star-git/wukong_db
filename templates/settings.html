@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block styles %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='settings.css') }}">
+{% endblock %}
+{% block content %}
+    <div class="settings-page">
+        <!-- Tabs -->
+        <div class="settings-tabs">
+            <button type="button" class="tab active" data-tab="workers">Workers</button>
+            <button type="button" class="tab" data-tab="sites">Construction sites</button>
+        </div>
+        <!-- Workers tab -->
+        <form method="post" class="workers-settings tab-panel active" id="workers">
+            <div class="workers-grid">
+                {% for worker in workers %}
+                    <div class="worker-card">
+                        <div class="worker-name">{{ worker.normalized_name }}</div>
+                        <input type="text"
+                               name="cedula_{{ worker.id }}"
+                               placeholder="Cédula"
+                               value="{{ worker.cedula or '' }}">
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="settings-actions">
+                <button type="submit">Save changes</button>
+            </div>
+        </form>
+        <!-- Construction sites tab -->
+        <form method="post" class="workers-settings tab-panel" id="sites">
+            <div class="workers-grid">
+                {% for site in sites %}
+                    <div class="worker-card">
+                        <div class="worker-name">{{ site.code }}</div>
+                        <input type="text"
+                               name="site_name_{{ site.id }}"
+                               placeholder="Construction site name"
+                               value="{{ site.name or '' }}">
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="settings-actions">
+                <button type="submit">Save changes</button>
+            </div>
+        </form>
+    </div>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+            document.querySelectorAll(".tab").forEach(t =>
+                t.classList.remove("active")
+            );
+            document.querySelectorAll(".tab-panel").forEach(p =>
+                p.classList.remove("active")
+            );
+
+            tab.classList.add("active");
+            document
+                .getElementById(tab.dataset.tab)
+                .classList.add("active");
+        });
+    });
+});
+    </script>
+{% endblock %}
