@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='confirmation.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/confirmation.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -9,7 +9,7 @@
         <h1>Existing Week</h1>
         <p>Week {{ kw }} of year {{ year }} already exists in the database.</p>
         <p>Do you want to overwrite the existing data?</p>
-        <form action="{{ url_for("overwrite_week") }}"
+        <form action="{{ url_for("weeks.overwrite_week") }}"
               method="post"
               enctype="multipart/form-data">
             <!-- Hidden fields to pass info -->

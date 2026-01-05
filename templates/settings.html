@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block styles %}
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='settings.css') }}">
+          href="{{ url_for('static', filename='css/settings.css') }}">
 {% endblock %}
 {% block content %}
     <div class="settings-page">
@@ -45,23 +45,5 @@
             </div>
         </form>
     </div>
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-            document.querySelectorAll(".tab").forEach(t =>
-                t.classList.remove("active")
-            );
-            document.querySelectorAll(".tab-panel").forEach(p =>
-                p.classList.remove("active")
-            );
-
-            tab.classList.add("active");
-            document
-                .getElementById(tab.dataset.tab)
-                .classList.add("active");
-        });
-    });
-});
-    </script>
+    <script src="{{ url_for('static', filename='js/settings_tabs.js') }}"></script>
 {% endblock %}
