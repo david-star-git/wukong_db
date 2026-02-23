@@ -11,7 +11,7 @@ def dashboard():
         """
         SELECT id, display_name, active
         FROM workers
-        ORDER BY active DESC, display_name
+        ORDER BY id
         """
     ).fetchall()
 

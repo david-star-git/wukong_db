@@ -14,7 +14,7 @@ body
     color: var(--text);
     font-family: system-ui;
     margin: 0;
-    padding: 1rem;
+    padding: 0;
 }
 
 button 

@@ -1,38 +1,108 @@
 {% extends "base.html" %}
 {% block styles %}
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
 {% block content %}
-    <div class="dashboard">
-        <aside class="workers">
-            {% for w in workers %}
-                <div class="worker {% if not w.active %}inactive{% endif %}"
-                     data-worker-id="{{ w.id }}">{{ w.display_name }}</div>
-            {% endfor %}
-        </aside>
-        <main class="content">
-            <h1 id="worker-name"></h1>
-            <div id="worker-cedula"></div>
-            <div class="stats">
-                <div>
-                    Total days: <span id="total-days"></span>
-                </div>
-                <div>
-                    Total salary: <span id="total-salary"></span>
-                </div>
-                <div>
-                    Total bonus: <span id="total-bonus"></span>
+<div class="dashboard">
+
+    <!-- ── LEFT SIDEBAR ── -->
+    <aside class="workers">
+        <div class="workers-header">Workers</div>
+        {% for w in workers %}
+            <div class="worker {% if not w.active %}inactive{% endif %}"
+                 data-worker-id="{{ w.id }}">
+                <span class="worker-dot {% if w.active %}active{% endif %}"></span>
+                {{ w.display_name }}
+            </div>
+        {% endfor %}
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="content" id="main-content">
+
+        <div class="worker-header">
+            <div class="worker-identity">
+                <h1 id="worker-name">—</h1>
+                <div class="worker-meta">
+                    <span class="badge" id="worker-cedula-badge"></span>
+                    <span class="badge seniority-badge" id="worker-seniority"></span>
                 </div>
             </div>
-            <div class="charts">
+            <div class="stars-block">
+                <div class="stars-label">Performance Rating</div>
+                <div class="stars" id="worker-stars">
+                    <span class="star" data-i="1">★</span>
+                    <span class="star" data-i="2">★</span>
+                    <span class="star" data-i="3">★</span>
+                    <span class="star" data-i="4">★</span>
+                    <span class="star" data-i="5">★</span>
+                </div>
+                <div class="stars-sub" id="stars-sub"></div>
+            </div>
+        </div>
+
+        <!-- ── STAT CARDS ── -->
+        <div class="stat-cards">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-body">
+                    <div class="stat-value" id="stat-days">—</div>
+                    <div class="stat-label">Total Days Worked</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📆</div>
+                <div class="stat-body">
+                    <div class="stat-value" id="stat-weeks">—</div>
+                    <div class="stat-label">Weeks on Record</div>
+                </div>
+            </div>
+            <div class="stat-card accent">
+                <div class="stat-icon">💰</div>
+                <div class="stat-body">
+                    <div class="stat-value" id="stat-salary">—</div>
+                    <div class="stat-label">Total Salary Paid</div>
+                </div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon">🎁</div>
+                <div class="stat-body">
+                    <div class="stat-value" id="stat-bonus">—</div>
+                    <div class="stat-label">Total Bonus Received</div>
+                </div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-body">
+                    <div class="stat-value" id="stat-likelihood">—</div>
+                    <div class="stat-label">Bonus Likelihood <span class="sub">(last month)</span></div>
+                    <div class="likelihood-bar-wrap">
+                        <div class="likelihood-bar" id="likelihood-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── CHARTS ── -->
+        <div class="charts-grid">
+            <div class="chart-card span2">
+                <div class="chart-title">Days Worked per Week</div>
                 <canvas id="daysChart"></canvas>
+            </div>
+            <div class="chart-card span2">
+                <div class="chart-title">Bonus per Week</div>
                 <canvas id="bonusChart"></canvas>
+            </div>
+            <div class="chart-card full">
+                <div class="chart-title">Days by Construction Site</div>
                 <canvas id="siteChart"></canvas>
             </div>
-        </main>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script>loadWorker({{ selected_worker_id }});</script>
+        </div>
+
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>loadWorker({{ selected_worker_id }});</script>
 {% endblock %}
