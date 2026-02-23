@@ -7,7 +7,7 @@
 
     <!-- ── LEFT SIDEBAR ── -->
     <aside class="workers">
-        <div class="workers-header">Workers</div>
+        <div class="workers-header">Employees</div>
         {% for w in workers %}
             <div class="worker {% if not w.active %}inactive{% endif %}"
                  data-worker-id="{{ w.id }}">
