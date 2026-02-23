@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block styles %}
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+{% block content %}
+    <div class="dashboard">
+        <aside class="workers">
+            {% for w in workers %}
+                <div class="worker {% if not w.active %}inactive{% endif %}"
+                     data-worker-id="{{ w.id }}">{{ w.display_name }}</div>
+            {% endfor %}
+        </aside>
+        <main class="content">
+            <h1 id="worker-name"></h1>
+            <div id="worker-cedula"></div>
+            <div class="stats">
+                <div>
+                    Total days: <span id="total-days"></span>
+                </div>
+                <div>
+                    Total salary: <span id="total-salary"></span>
+                </div>
+                <div>
+                    Total bonus: <span id="total-bonus"></span>
+                </div>
+            </div>
+            <div class="charts">
+                <canvas id="daysChart"></canvas>
+                <canvas id="bonusChart"></canvas>
+                <canvas id="siteChart"></canvas>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>loadWorker({{ selected_worker_id }});</script>
+{% endblock %}
