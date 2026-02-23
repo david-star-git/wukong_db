@@ -1,0 +1,14 @@
+services:
+  wukond:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "80:5000"
+    env_file:
+      - .env
+    volumes:
+      - db_data:/app/instance
+      - db_data:/app/uploads
+
+volumes:
+  db_data:
