@@ -7,6 +7,19 @@ from core.csv_import import import_csv
 UPLOAD_DIR = "uploads"
 
 
+def _count_csv_workers(rows):
+    """Count non-empty worker rows (skip header rows at index 0 and 1)."""
+    import re
+    count = 0
+    for row in rows[2:]:
+        if not row or not any(c.strip() for c in row):
+            continue
+        name = re.sub(r"^\s*\d+[\.\-\s]*", "", row[0].strip())
+        if any(c.isalpha() for c in name):
+            count += 1
+    return count
+
+
 def handle_upload(request):
     file = request.files.get("file")
     if not file or not file.filename:
@@ -35,7 +48,9 @@ def handle_upload(request):
             f.write(raw)
 
     try:
-        kw, year, exists = import_csv(BytesIO(raw), db_path="instance/app.db")
+        kw, year, exists, worker_count, attendance_count = import_csv(
+            BytesIO(raw), db_path="instance/app.db"
+        )
     except Exception as e:
         return {"status": "error", "message": f"Import failed: {e}"}
 
@@ -47,7 +62,13 @@ def handle_upload(request):
             "file_path": archive_path,
         }
 
-    return {"status": "ok", "year": year, "kw": kw}
+    return {
+        "status": "ok",
+        "year": year,
+        "kw": kw,
+        "worker_count": worker_count,
+        "attendance_count": attendance_count,
+    }
 
 
 def overwrite_existing_week(request):
@@ -56,6 +77,6 @@ def overwrite_existing_week(request):
 
     path = f"{UPLOAD_DIR}/week_{year}_{kw}.csv"
     with open(path, "rb") as f:
-        import_csv(f, db_path="instance/app.db")
+        _, _, _, worker_count, attendance_count = import_csv(f, db_path="instance/app.db")
 
-    return year, kw
+    return year, kw, {"worker_count": worker_count, "attendance_count": attendance_count}

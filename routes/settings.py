@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from core.db import get_db
+from core.auth import login_required
 import sqlite3
 
 
@@ -7,6 +8,7 @@ settings_bp = Blueprint("settings", __name__)
 
 
 @settings_bp.route("/settings", methods=["GET", "POST"])
+@login_required
 def settings():
     conn = get_db()
 
@@ -63,7 +65,7 @@ def settings():
         SELECT id, normalized_name, cedula
         FROM workers
         WHERE active = 1
-        ORDER BY normalized_name
+        ORDER BY id
         """
     ).fetchall()
 

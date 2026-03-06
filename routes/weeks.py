@@ -3,10 +3,13 @@ from services.week_service import (
     get_week_overview_data,
     get_week_view_data,
 )
+from core.auth import login_required
 
 weeks_bp = Blueprint("weeks", __name__)
 
+
 @weeks_bp.route("/weeks/<int:year>")
+@login_required
 def week_overview(year):
     return render_template(
         "week_overview.html",
@@ -15,6 +18,7 @@ def week_overview(year):
 
 
 @weeks_bp.route("/week/<int:year>/<int:kw>")
+@login_required
 def view_week(year, kw):
     return render_template(
         "week_view.html",

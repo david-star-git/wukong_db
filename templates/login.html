@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wukong DB — Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body class="login-body">
+    <div class="login-card">
+        <div class="login-logo">Wukong DB</div>
+        <form method="post" class="login-form">
+            {% if error %}
+                <div class="login-error">{{ error }}</div>
+            {% endif %}
+            <div class="login-field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" autofocus autocomplete="username" required>
+            </div>
+            <div class="login-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="login-btn">Sign in</button>
+        </form>
+    </div>
+</body>
+</html>

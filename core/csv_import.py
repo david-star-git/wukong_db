@@ -182,6 +182,9 @@ def import_csv(file, db_path="instance/app.db"):
     day_columns, payroll_cols = detect_columns(rows[1])
     cur = conn.cursor()
 
+    worker_count = 0
+    attendance_count = 0
+
     for sort_order, row in enumerate(rows[2:]):
         if not row or not any(c.strip() for c in row):
             continue
@@ -191,6 +194,7 @@ def import_csv(file, db_path="instance/app.db"):
             continue
 
         worker_id = upsert_worker(cur, display_name)
+        worker_count += 1
 
         # Attendance
         for day_idx, cols in day_columns.items():
@@ -205,6 +209,7 @@ def import_csv(file, db_path="instance/app.db"):
                 insert_attendance(
                     cur, worker_id, week_id, day_idx, half, site_id, sort_order
                 )
+                attendance_count += 1
 
         # Payroll
         insert_payroll(
@@ -236,4 +241,4 @@ def import_csv(file, db_path="instance/app.db"):
     conn.commit()
     conn.close()
 
-    return kw, year, existed_before
+    return kw, year, existed_before, worker_count, attendance_count
