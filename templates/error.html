@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="error-page">
+    <div class="error-code">{{ code }}</div>
+    <div class="error-message">{{ message }}</div>
+    <a href="{{ url_for('dashboard.dashboard') }}" class="error-back">← Back to dashboard</a>
+</div>
+<style>
+.error-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 56px);
+    gap: 12px;
+    text-align: center;
+}
+.error-code {
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+}
+.error-message {
+    font-size: 1.1rem;
+    color: var(--subtext, #a6adc8);
+}
+.error-back {
+    margin-top: 8px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.error-back:hover { text-decoration: underline; }
+</style>
+{% endblock %}

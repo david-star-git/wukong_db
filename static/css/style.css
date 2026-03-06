@@ -27,3 +27,35 @@ button
     border-radius: 10px;
 }
 
+/* Flash messages */
+.flash-messages {
+    padding: 0 1.5rem;
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.flash {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+}
+
+.flash-success {
+    background: #a6e3a122;
+    border: 1px solid #a6e3a1;
+    color: #a6e3a1;
+}
+
+.flash-error {
+    background: #f38ba822;
+    border: 1px solid #f38ba8;
+    color: #f38ba8;
+}
+
+/* Logout nav item */
+.nav-logout {
+    color: var(--subtext, #a6adc8);
+    margin-left: 0.5rem;
+}
